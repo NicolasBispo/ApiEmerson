@@ -9,12 +9,16 @@
 # Use this hook to configure devise mailer, warden hooks and so forth.
 # Many of these configuration options can be set straight in your model.
 Devise.setup do |config|
+  config.navigational_formats = []
+  config.jwt do |jwt|
+    jwt.secret = ENV['DEVISE_JWT_SECRET_KEY']
+  end
   # The secret key used by Devise. Devise uses this key to generate
   # random tokens. Changing this key will render invalid all existing
   # confirmation, reset password and unlock tokens in the database.
   # Devise will use the `secret_key_base` as its `secret_key`
   # by default. You can change it below and use your own secret key.
-  # config.secret_key = '56fd80b35a7b0877c174be26e2b7e55cdcf602e3c05f539acdaedbb23ab2ef005af2f75b3073f3d603d608025a2d6c0b20e25c85519a9fae3796dc9ea045b844'
+  # config.secret_key = '55e20decc8f7f57b1f27411764ded0b17283bead9b029373ad5abbc2a3988d9ff600f2bcb675f36d406184e32bcf9e668bb3dce0108f79c9fd3ae14f2456c2cc'
 
   # ==> Controller configuration
   # Configure the parent class to the devise controllers.
@@ -126,7 +130,7 @@ Devise.setup do |config|
   config.stretches = Rails.env.test? ? 1 : 12
 
   # Set up a pepper to generate the hashed password.
-  # config.pepper = '12148f37ff9039bc4ed5c9bc910d92198ec7afa0309675666ab7756ca88be1e5168347d247612d22d64cdd5013fcae691163538427baeddcf8ac472eb0185722'
+  # config.pepper = '2beb32a85a033f5729a6e68d50f5b0a1648e1b8cd432555f4ae00649ecfbf8a565ff2b53addbe8700b407f2f0443f0ee6a56b728f684d02c93a60c6cc2c31fe6'
 
   # Send a notification to the original email when the user's email is changed.
   # config.send_email_changed_notification = false
@@ -281,6 +285,10 @@ Devise.setup do |config|
   #   manager.intercept_401 = false
   #   manager.default_strategies(scope: :user).unshift :some_external_strategy
   # end
+  config.warden do |manager|
+    manager.default_strategies(scope: :user).unshift :jwt
+  end
+  
 
   # ==> Mountable engine configurations
   # When using Devise inside an engine, let's call it `MyEngine`, and this engine
@@ -311,7 +319,7 @@ Devise.setup do |config|
   # changed. Defaults to true, so a user is signed in automatically after changing a password.
   # config.sign_in_after_change_password = true
   config.jwt do |jwt|
-    jwt.secret = ENV["DEVISE_JWT_SECRET_KEY"]
+    jwt.secret = ENV['DEVISE_JWT_SECRET_KEY']
     jwt.dispatch_requests = [
       ['POST', %r{^/login$}]
     ]

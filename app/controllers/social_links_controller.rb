@@ -1,9 +1,12 @@
 class SocialLinksController < ApplicationController
+  before_action :authenticate_user!
   before_action :set_social_link, only: %i[ show update destroy ]
+  before_action :has_permission_on_social_link, only: %i[show update destroy]
+  before_action :check_id_similarity, only: %i[create update]
 
   # GET /social_links
   def index
-    @social_links = SocialLink.all
+    @social_links = current_user.social_links
 
     render json: @social_links
   end
@@ -46,6 +49,18 @@ class SocialLinksController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def social_link_params
-      params.require(:social_link).permit(:name, :url)
+      params.require(:social_link).permit(:name, :url, :user_id)
+    end
+
+    def has_permission_on_social_link
+      unless current_user.id == @social_link.user.id
+        return render json: {message: "Sem permissão de acesso"}, status: :unauthorized
+      end
+    end
+
+    def check_id_similarity
+      unless params[:social_link][:user_id] == current_user.id
+        return render json: {message: "Voce não tem permissão de acesso"}, status: :unauthorized
+      end
     end
 end
